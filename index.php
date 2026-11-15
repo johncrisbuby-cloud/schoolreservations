@@ -32,11 +32,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password    = trim($_POST['password'] ?? '');
 
     if (!empty($login_input) && !empty($password)) {
-        // Query using username, student_id, or email
-        $stmt = $conn->prepare("SELECT * FROM users WHERE username = ? OR student_id = ? OR email = ? LIMIT 1");
+        // Query using username, student_id, faculty_id, or email
+        $stmt = $conn->prepare("SELECT * FROM users WHERE username = ? OR student_id = ? OR faculty_id = ? OR email = ? LIMIT 1");
         
         if ($stmt) {
-            $stmt->bind_param("sss", $login_input, $login_input, $login_input);
+            $stmt->bind_param("ssss", $login_input, $login_input, $login_input, $login_input);
             $stmt->execute();
             $result = $stmt->get_result();
 
@@ -56,9 +56,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Allow user login (Approved Student, Faculty, or Admin)
                         $_SESSION['user_id']    = $user['id'];
                         $_SESSION['student_id'] = $user['student_id'] ?? $user['faculty_id'] ?? '';
-                        $_SESSION['username']   = $user['username'];
-                        $_SESSION['full_name']  = $user['full_name'];
-                        $_SESSION['role']       = $user['role'];
+                        $_SESSION['username']   = $user['username'] ?? '';
+                        $_SESSION['full_name']  = $user['full_name'] ?? '';
+                        $_SESSION['role']       = $user['role'] ?? 'student';
 
                         // ROLE-BASED REDIRECTION
                         if ($role === 'admin') { 
@@ -519,17 +519,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="logo-title" style="text-align: center;">School Facility<br>Reservation System</div>
 
-            <!-- Note: Tinanggal na ang naka-display na success alert dito para malinis ang form -->
-
-            <!-- Error Notification Message (Para sa wrong password o pending status kapag nag-login) -->
+            <!-- Error Notification Message -->
             <?php if (!empty($error)): ?>
                 <div class="alert alert-danger"><?= $error; ?></div>
             <?php endif; ?>
 
-            <form method="POST" action="login.php">
+            <form method="POST" action="index.php">
                 <div class="form-group">
-                    <label>Email / User ID</label>
-                    <input type="text" name="username" required placeholder="Enter username or ID">
+                    <label>Email / User ID / Username</label>
+                    <input type="text" name="username" required placeholder="Enter username, ID, or email">
                 </div>
 
                 <div class="form-group">
@@ -621,7 +619,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         });
 
-        // --- JavaScript para sa Toggle/Auto-Close ng Toast Box at pag-alis ng Badge pagka-click ---
         const notifBellBtn = document.getElementById('notifBellBtn');
         const toastNotification = document.getElementById('toastNotification');
         const toastMessage = document.getElementById('toastMessage');
@@ -634,26 +631,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         notifBellBtn.addEventListener('click', function(e) {
             e.preventDefault();
             
-            // Kung nakabukas na ang toast box, isara ito (toggle). Kung nakasara, buksan.
             if (toastNotification.style.display === 'block') {
                 toastNotification.style.display = 'none';
                 clearTimeout(hideTimeout);
                 return;
             }
 
-            // Ilagay ang text at ipakita ang toast box
             toastMessage.innerHTML = notificationText;
             toastNotification.style.display = 'block';
 
-            // Automatic na tanggalin/itago ang pulang badge count kapag na-click na ang bell
             if (notifBadge) {
                 notifBadge.style.display = 'none';
             }
 
-            // I-clear ang lumang timer para hindi magpatong-patong
             clearTimeout(hideTimeout);
 
-            // Awtomatikong mawawala pagkalipas ng 20 segundo (20000 ms)
             hideTimeout = setTimeout(function() {
                 toastNotification.style.display = 'none';
             }, 30000);
