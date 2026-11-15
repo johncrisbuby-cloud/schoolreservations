@@ -1,12 +1,13 @@
 FROM php:8.1-apache
 
-# Kopyahin ang buong project files
+# Kopyahin ang lahat ng kasalukuyang files patungo sa Apache document root
 COPY . /var/www/html/
 
-# Kopyahin ang custom apache config at i-enable
-COPY render-apache.conf /etc/apache2/sites-available/000-default.conf
+# I-enable ang Apache rewrite module at itakda ang log.in.php bilang DirectoryIndex
+RUN a2enmod rewrite \
+    && echo "DirectoryIndex log.in.php index.php" > /etc/apache2/mods-enabled/dir.conf
 
-# Bigyan ng tamang pahintulot
+# Ayusin ang permissions ng mga file para mabasa ng web server
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
