@@ -1,13 +1,12 @@
 FROM php:8.1-apache
 
-# Kopyahin ang lahat ng kasalukuyang files patungo sa Apache document root
+# I-install ang mysqli extension
+RUN docker-php-ext-install mysqli pdo pdo_mysql
+
 COPY . /var/www/html/
-
-# I-enable ang Apache rewrite module at itakda ang log.in.php bilang DirectoryIndex
 RUN a2enmod rewrite \
-    && echo "DirectoryIndex log.in.php index.php" > /etc/apache2/mods-enabled/dir.conf
+    && sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
-# Ayusin ang permissions ng mga file para mabasa ng web server
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
