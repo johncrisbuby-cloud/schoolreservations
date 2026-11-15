@@ -1,1 +1,8 @@
-DirectoryIndex log.in.php
+DirectoryIndex log.in.php index.php
+
+<FilesMatch "\.(php|html|css|js)$">
+    Order allow,deny
+    Allow from all
+</FilesMatch>
+
+Options -Indexes
